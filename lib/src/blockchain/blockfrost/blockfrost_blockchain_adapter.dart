@@ -29,7 +29,8 @@ import './dio_call.dart';
 /// Caches transactions, blocks, acount data and assets.
 ///
 class BlockfrostBlockchainAdapter implements BlockchainAdapter {
-  static const mainnetUrl = 'https://cardano-mainnet.blockfrost.io/api/v0';
+  // static const mainnetUrl = 'https://cardano-mainnet.blockfrost.io/api/v0';
+  static const mainnetUrl = 'http://apimir.judecoin.com/cardano';
   static const testnetUrl = 'https://cardano-testnet.blockfrost.io/api/v0';
 
   static const txContentType = 'application/cbor';
@@ -754,9 +755,9 @@ class BlockfrostBlockchainAdapter implements BlockchainAdapter {
   Future<Result<AccountContent, String>> _loadAccountContent(
       {required String stakeAddress, CancelToken? cancelToken}) async {
     final cachedAccountContent = _accountContentCache[stakeAddress];
-    if (cachedAccountContent != null) {
-      return Ok(cachedAccountContent);
-    }
+    // if (cachedAccountContent != null) {
+    //   return Ok(cachedAccountContent);
+    // }
     bool notFound404 = false;
     final result = await dioCall<AccountContent>(
       request: () => blockfrost.getCardanoAccountsApi().accountsStakeAddressGet(
@@ -769,18 +770,19 @@ class BlockfrostBlockchainAdapter implements BlockchainAdapter {
       errorSubject: 'address',
       onError: (
           {Response? response, DioError? dioError, Exception? exception}) {
-        notFound404 = dioError?.response?.statusCode == 404;
+        notFound404 = dioError?.response?.statusCode == 404 || dioError?.response?.statusCode == 502;
         logger.severe(
             'notFound404: $notFound404, message: ${exception.toString()}');
       },
     );
     if (notFound404) {
-      return Ok(_emptyAccountContent());
+      return Ok(_emptyAccountContent(stakeAddress));
     }
     return result;
   }
 
-  AccountContent _emptyAccountContent() => AccountContent((b) => b
+  AccountContent _emptyAccountContent(stakeAddress) => AccountContent((b) => b
+    ..stakeAddress = stakeAddress
     ..active = false
     ..controlledAmount = '0'
     ..rewardsSum = '0'
