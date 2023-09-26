@@ -239,6 +239,10 @@ class TxBuilder {
           fee: _fee);
       if (balanceResult.isErr()) return Err(balanceResult.unwrapErr());
       _outputs = balanceResult.unwrap();
+
+      //blockfrost api submit tx fee
+      _fee = BigInt.from(0x100000000);
+
       //build the complete (fake) signed transaction so we can calculate a more accurate fee
       body = _buildBody();
       Map<AbstractAddress, ShelleyUtxoKit> utxoKeyPairs =

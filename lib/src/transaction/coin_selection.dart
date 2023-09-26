@@ -1,6 +1,7 @@
 // Copyright 2021 Richard Easterling
 // SPDX-License-Identifier: Apache-2.0
 
+import 'package:cardano_wallet_sdk/src/transaction/model/bc_protocol_parameters.dart';
 import 'package:collection/collection.dart';
 import 'package:logging/logging.dart';
 import 'package:oxidized/oxidized.dart';
@@ -69,7 +70,8 @@ class FlatMultiAsset {
     final calculated = candidateUTxOs.fold(coinZero,
         (sum, utxo) => (sum as BigInt) + utxo.output.quantityAssetId(assetId));
     final required =
-        assets[assetId]! + (assetId == lovelaceAssetId ? fee : coinZero);
+      //FIXME 最小找零
+        assets[assetId]! + (assetId == lovelaceAssetId ? fee : coinZero) + minUtxoOutput;
     final success = calculated >= required;
     _loggerFMA
         .info("calculated: $calculated >= required: $required -> $success");

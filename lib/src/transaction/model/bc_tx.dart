@@ -143,7 +143,7 @@ class BcValue extends BcAbstractCbor {
     final ma = multiAssets
         .map((m) => m.toCborMap())
         .reduce((m1, m2) => m1..addAll(m2));
-    return CborList([CborSmallInt(coin.toInt()), ma]);
+    return CborList([CborInt(coin), ma]);
   }
 
   @override
@@ -184,7 +184,7 @@ class BcTransactionOutput extends BcAbstractCbor {
     //length should always be 2
     return CborList([
       CborBytes(unit8BufferFromShelleyAddress(address)),
-      value.multiAssets.isEmpty ? CborBigInt(value.coin) : value.toCborList()
+      value.multiAssets.isEmpty ? CborInt(value.coin) : value.toCborList()
     ]);
   }
 
@@ -201,7 +201,7 @@ class BcWithdrawal extends BcAbstractCbor {
   factory BcWithdrawal.fromCbor({required MapEntry mapEntry}) {
     final address =
         bech32ShelleyAddressFromIntList((mapEntry.key as CborBytes).bytes);
-    final coin = (mapEntry.value as CborBigInt).toBigInt();
+    final coin = (mapEntry.value as CborInt).toBigInt();
     return BcWithdrawal(rewardAddress: address, coin: coin);
   }
 
@@ -210,7 +210,7 @@ class BcWithdrawal extends BcAbstractCbor {
 
   CborMap toCborMap() => CborMap({
         CborBytes(unit8BufferFromShelleyAddress(rewardAddress)):
-            CborBigInt(coin)
+            CborInt(coin)
       });
 
   @override
@@ -294,7 +294,8 @@ class BcTransactionBody extends BcAbstractCbor {
       const CborSmallInt(1):
           CborList([for (final output in outputs) output.toCborList()]),
       //2:fee
-      const CborSmallInt(2): CborBigInt(fee),
+      // const CborSmallInt(2): CborBigInt(fee),
+      const CborSmallInt(2): CborInt(fee),
       //3:ttl (optional)
       if (ttl != null) const CborSmallInt(3): CborSmallInt(ttl!),
       //4:certs (optional)

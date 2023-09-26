@@ -149,6 +149,8 @@ class ProtocolParameters {
 /// default fee for simple ADA transaction
 final defaultFee = BigInt.from(170000); // 0.2 ADA
 
+final minUtxoOutput = BigInt.from(969750);
+
 /*
 EpochParamContent {
   epoch=243,
